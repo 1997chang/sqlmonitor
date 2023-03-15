@@ -60,7 +60,7 @@ SQL-Monitor检测到执行的SQL语句，StatementId:【com.example.mybatis.log.
 ### 1. 添加依赖
 ```xml
 <dependency>
-    <groupId>com.moxiao</groupId>
+    <groupId>io.github.1997chang</groupId>
     <artifactId>sqlmonitor-mybatis</artifactId>
     <version>最新版本</version>
 </dependency>
