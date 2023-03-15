@@ -6,7 +6,7 @@
 
 本文档主要Mybatis默认集成，使用配置文件配置，或者自己手动加入该插件。
 
-当使用Spring boot自动集成，参看[spring boot sqlMonitor集成](https://github.com/1997chang/sqlmonitor-spring-boot)
+如果使用Spring boot自动集成，参看[spring boot sqlMonitor集成](https://github.com/1997chang/sqlmonitor-spring-boot)
 
 The SQL Monitor can help you quickly find SQL statement executor point with Mybatis. Because we hard find SQL statement from own application position in using Mybatis. 
 
@@ -14,16 +14,46 @@ The SQL Monitor can help you quickly find SQL statement executor point with Myba
 
 ## 主要解决
 
-当使用MySQL等其他数据库监控时，会告诉你完成的SQL语句耗时严重问题。但是我们很难根据一条完整的SQL语句去定位哪个Mapper的哪个方法造成的。因为Mapper文件中可能包含参数条件判断、迭代语句等，又或者在其他Mapper中有相似SQL语句。
+当我们使用MySQL等其他数据库监控时，会告诉你完整的SQL语句的耗时信息。一般我们很难根据一条完整的SQL语句去定位由哪个Mapper的哪个方法造成的。因为Mapper文件中可能包含参数条件判断、迭代语句等，又或者在其他Mapper中有相似SQL语句。
 
-而该插件将会告诉你：完整的SQL语句，Mapper文件、以及调用栈、执行时间等信息。
+当使用该插件时：会告诉你：完整的SQL语句，Mapper文件和方法、调用栈、执行时间等信息。
 
-从而快速定位数据库监控中SQL语句是由哪个Mapper的哪个方法造成。
+从而根据数据库监控中的SQL语句快速定位哪个Mapper的哪个方法造成，从而对Mapper中的SQL语句进行优化。
 
 ## 主要功能
 
-- 存储执行SQL语句的信息：现集成：Logger打印，ES存储。默认为Logger。也可以自己实现，只要实现`com.moxiao.sqlmonitor.store.StorePolicy`类
-- 通知慢SQL语句的执行信息：现集成：钉钉通知。或者实现`com.moxiao.sqlmonitor.notice.NoticePolicy`类
+### 记录SQL语句内容
+
+1. 记录数据库的每一个CRUD操作内容。其中信息主要包含：完整的SQL语句，Mapper文件和方法、调用栈、执行时间等信息。然后使用指定的存储策略进行存储。
+2. 可以存储在日志系统中，也可以存储在第三方持久层中。
+3. 存储策略自带集成：Logger打印，ES存储。默认为Logger。也可以自己实现存储策略，只要实现`com.moxiao.sqlmonitor.store.StorePolicy`类
+
+例如：日志记录内容。当DEBUG模式开启，将会额外打印执行栈的信息
+```
+SQL-Monitor检测到执行的SQL语句，StatementId:【com.example.mybatis.log.Count.count】SQL语句为：【select count(*)
+    from names】，开始执行时间：【2023-03-15 11:35:05】，耗时：【4】ms
+```
+
+### 通知慢SQL语句
+
+1. 一条SQL语句的执行时间大于`executeTimeLimit`，则该SQL语句会被定位为慢SQL语句。使用指定的通知策略对慢SQL进行通知。
+2. 通知方式有两种：
+   1. *SQL语句执行完进行的通知*。当SQL语句执行完，并且执行时间大于`executeTimeLimit`，使用指定的通知策略进行通知。
+      > 通知信息：
+      > 1. Mapper路径
+      > 2. 完整的SQL语句
+      > 3. 执行SQL语句总耗时
+      > 4. 执行SQL语句的栈内容
+
+   2. *定时监控进行的通知*。当SQL语句还没有完成，但该SQL语句已经执行时间大于`executeTimeLimit`，由定时监控进行通知。注意：定时监控的时间间隔为`slowSqlMonitor`。
+      > 通知信息：
+      > 1. 已经执行了时间，还没有执行完成
+      > 2. Mapper路径
+      > 3. 完整的SQL语句
+      > 4. 开始执行SQL语句时间
+      > 5. 执行SQL语句的栈内容
+
+3. 通知策略自带：钉钉通知。也可以自己实现存储策略，只要实现`com.moxiao.sqlmonitor.notice.NoticePolicy`类
 
 ## 如何使用
 
