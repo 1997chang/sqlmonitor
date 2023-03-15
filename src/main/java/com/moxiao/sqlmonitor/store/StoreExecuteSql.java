@@ -2,9 +2,7 @@ package com.moxiao.sqlmonitor.store;
 
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.moxiao.sqlmonitor.interceptor.SqlMonitorInterceptor;
 import com.moxiao.sqlmonitor.interceptor.StatementMonitorTask;
-import com.moxiao.sqlmonitor.property.SqlMonitorProperty;
 import com.moxiao.sqlmonitor.util.SQLParseUtils;
 
 import java.io.Serializable;

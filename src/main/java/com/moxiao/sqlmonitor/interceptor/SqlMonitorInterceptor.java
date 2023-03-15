@@ -13,10 +13,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -26,17 +23,13 @@ import java.time.LocalDateTime;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, 
                 RowBounds.class, ResultHandler.class}),
-        @Signature(type = Executor.class, method = "queryCursor", args = {MappedStatement.class, Object.class, RowBounds.class}),
         @Signature(type = StatementHandler.class, method = "query", args = {Statement.class, ResultHandler.class}),
-        @Signature(type = StatementHandler.class, method = "update", args = {Statement.class}),
-        @Signature(type = StatementHandler.class, method = "queryCursor", args = {Statement.class})
+        @Signature(type = StatementHandler.class, method = "update", args = {Statement.class})
 })
 public class SqlMonitorInterceptor implements Interceptor {
     
@@ -79,6 +72,11 @@ public class SqlMonitorInterceptor implements Interceptor {
         StoreHolder.build(sqlMonitorProperty.getStorePolicy());
         NoticeHolder.build(sqlMonitorProperty.getNoticePolicy());
         TimeMonitor.reStart();
+    }
+
+    @Override
+    public Object plugin(Object target) {
+        return Plugin.wrap(target, this);
     }
 
     public static SqlMonitorProperty getSqlMonitorProperty() {
