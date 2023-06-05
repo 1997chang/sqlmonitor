@@ -66,7 +66,7 @@ SQL-Monitor检测到执行的SQL语句，StatementId:【com.example.mybatis.log.
 </dependency>
 ```
 
-注意：当使用钉钉进行通知的时候：如何配置钉钉机器人的配置信息依赖，还要添加okhttp3依赖，版本要求4.1.0以上
+注意：当使用钉钉进行通知的时候：除了配置钉钉机器人的配置信息以外，还要添加okhttp3依赖，版本要求4.1.0以上
 ```xml
 <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
 <dependency>
