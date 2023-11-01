@@ -7,5 +7,9 @@ public interface StorePolicy {
      * @param storeExecuteSql 存储SQL语句内容
      */
     void storeData(StoreExecuteSql storeExecuteSql);
+
+    default void storeSlowData(StoreExecuteSql storeExecuteSql) {
+        
+    }
     
 }

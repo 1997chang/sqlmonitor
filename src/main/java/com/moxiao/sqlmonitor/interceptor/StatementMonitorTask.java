@@ -76,12 +76,17 @@ public class StatementMonitorTask implements Runnable {
     }
 
     private void storeSql(StoreExecuteSql storeExecuteSql) {
+        SqlMonitorProperty sqlMonitorProperty = SqlMonitorInterceptor.getSqlMonitorProperty();
+        int executeTimeLimit = sqlMonitorProperty.getExecuteTimeLimit();
         try {
             for (StorePolicy storePolicy : StoreHolder.getStorePolicyList()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("准备使用存储策略：" + storePolicy.getClass().getName());
                 }
                 storePolicy.storeData(storeExecuteSql);
+                if (executeTimeConsuming > executeTimeLimit) {
+                    storePolicy.storeSlowData(storeExecuteSql);
+                }
             }
         } catch (Exception e) {
             logger.error("SQL存储出现问题", e);
@@ -96,8 +101,8 @@ public class StatementMonitorTask implements Runnable {
             ThreadPoolExecutor noticeThreadPool = NoticeThreadPool.getThreadPool();
             noticeThreadPool.execute(() -> {
                 try {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("执行时间为：" + executeTimeConsuming + "ms。最大限制时间：" + executeTimeLimit + "ms。准备执行通知");
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("执行时间为：" + executeTimeConsuming + "ms。最大限制时间：" + executeTimeLimit + "ms。准备执行通知");
                     }
                     for (NoticePolicy noticePolicy : NoticeHolder.getNoticePolicyList()) {
                         noticePolicy.notice(storeExecuteSql);
